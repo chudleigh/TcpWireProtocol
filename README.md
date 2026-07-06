@@ -127,6 +127,37 @@ instead of the three states.
 if (codec.TryDecode(frame, out byte[]? raw)) { /* raw is the decrypted message */ }
 ```
 
+## Examples
+
+Runnable client/server samples live in [`TcpWireProtocol.Samples/`](TcpWireProtocol.Samples/).
+There are four, each about a different part of using the library. Each is a pair of console apps
+sharing a small `Common` project (the socket glue), so run the server in one terminal and the
+client in another:
+
+```
+dotnet run --project TcpWireProtocol.Samples/01-Echo/Server
+dotnet run --project TcpWireProtocol.Samples/01-Echo/Client
+```
+
+**01-Echo** is the bare minimum. The client sends a `Request`, the server replies with a `Response`
+carrying the same payload, in the open ("zero key") mode. It shows how `FramedConnection` bridges a
+raw `NetworkStream` and the codec: read bytes off the socket, decode whole frames, send packets back.
+
+**02-Protobuf** adds structured payloads. The client serializes a `Person` object with protobuf-net
+into the request body; the server deserializes it, runs some stand-in business logic (an age check,
+null handling) and replies with an `Ack` object. The payload rides as protobuf's compact binary
+format, not text or JSON.
+
+**03-Rpc** is command dispatch with correlation. Two services (`Calc` and `Text`), each with a few
+commands, are routed by the header's `(service, command)` to their own async handlers. The client
+fires many requests at once over a single connection; the server handles them out of order (each
+handler takes a different time), and the client matches every reply back to its call by `CmdId`.
+
+**04-DiffieHellman** is key agreement and live rekeying. On connect, both sides exchange public keys
+(ECDH) as ordinary protocol packets sent in the open mode, derive a shared AES-256 key, then talk
+encrypted. Typing `rekey` runs a fresh exchange over the encrypted channel and switches both sides to
+a new key without dropping the connection.
+
 ## Encryption
 
 Encryption lives in the codec and doesn't touch the messages themselves: `Request`,
