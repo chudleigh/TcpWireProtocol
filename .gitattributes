@@ -1,0 +1,9 @@
+# Normalize line endings: store text as LF in the repo, let Git handle
+# the working-tree conversion per platform. Stops the LF/CRLF churn.
+* text=auto eol=lf
+
+# Binary types Git must never touch.
+*.png binary
+*.snk binary
+*.dll binary
+*.exe binary
