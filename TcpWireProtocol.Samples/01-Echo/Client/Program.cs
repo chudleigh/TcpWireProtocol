@@ -1,5 +1,4 @@
 using System;
-using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
 using TcpWireProtocol.Packets;
@@ -17,7 +16,7 @@ internal static class Program
     {
         var port = int.TryParse(Environment.GetEnvironmentVariable("PORT"), out var p) ? p : 5000;
 
-        using var tcp = await ConnectWithRetryAsync(port);
+        using var tcp = await WireClient.ConnectWithRetryAsync("127.0.0.1", port);
         using var conn = FramedConnection.Client(tcp.GetStream());
 
         if (args.Length > 0)
@@ -31,29 +30,6 @@ internal static class Program
             while (!string.IsNullOrEmpty(line = Console.ReadLine()))
             {
                 await ExchangeAsync(conn, line);
-            }
-        }
-    }
-
-    /// <summary>Connects to the server, retrying every second until it accepts (Ctrl+C to give up).</summary>
-    private static async Task<TcpClient> ConnectWithRetryAsync(int port)
-    {
-        var announced = false;
-        while (true)
-        {
-            try
-            {
-                return await WireClient.ConnectAsync("127.0.0.1", port);
-            }
-            catch (SocketException)
-            {
-                if (!announced)
-                {
-                    Console.WriteLine($"waiting for server on 127.0.0.1:{port}...");
-                    announced = true;
-                }
-
-                await Task.Delay(TimeSpan.FromSeconds(1));
             }
         }
     }
