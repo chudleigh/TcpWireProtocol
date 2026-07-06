@@ -99,9 +99,26 @@ public sealed class FramedConnection : IDisposable
         }
     }
 
+    /// <summary>
+    /// Swaps the codec (for example after a key exchange). The new codec restarts its counter at 0,
+    /// so treat rekeying as a barrier: run the key-exchange round-trip with no other request in
+    /// flight, and call this at a clean frame boundary (nothing partially received). A frame that
+    /// crosses the switch under the wrong codec fails the tag check as
+    /// <see cref="WireDecodeStatus.Corrupt"/>. The old codec is disposed.
+    /// </summary>
+    public void Rekey(IWireCodec codec)
+    {
+        ArgumentNullException.ThrowIfNull(codec);
+        if (_length != 0) { throw new InvalidOperationException("cannot rekey with a partial frame buffered"); }
+
+        (_codec as IDisposable)?.Dispose();
+        _codec = codec;
+    }
+
     /// <inheritdoc/>
     public void Dispose()
     {
+        (_codec as IDisposable)?.Dispose();
         _stream.Dispose();
     }
 
@@ -134,8 +151,8 @@ public sealed class FramedConnection : IDisposable
     private const int FRAME_HEADROOM = 64;
 
     private readonly NetworkStream _stream;
-    private readonly IWireCodec _codec;
     private readonly int _maxMessage;
+    private IWireCodec _codec;
     private byte[] _buffer = new byte[INITIAL_CAPACITY];
     private int _start;    // offset of the first unconsumed byte
     private int _length;   // number of unconsumed bytes

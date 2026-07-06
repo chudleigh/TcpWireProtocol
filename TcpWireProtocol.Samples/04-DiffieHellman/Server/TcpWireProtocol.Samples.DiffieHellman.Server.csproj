@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <RootNamespace>TcpWireProtocol.Samples.DiffieHellman.Server</RootNamespace>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Common\TcpWireProtocol.Samples.Common.csproj" />
+    <ProjectReference Include="..\Shared\TcpWireProtocol.Samples.DiffieHellman.Shared.csproj" />
+  </ItemGroup>
+
+</Project>

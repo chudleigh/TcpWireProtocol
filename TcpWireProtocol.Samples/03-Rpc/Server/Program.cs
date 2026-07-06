@@ -6,8 +6,8 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using TcpWireProtocol.Packets;
-using TcpWireProtocol.Samples.Rpc.Contracts;
 using TcpWireProtocol.Samples.Common;
+using TcpWireProtocol.Samples.Rpc.Contracts;
 
 namespace TcpWireProtocol.Samples.Rpc.Server;
 
